@@ -7,7 +7,7 @@
       <button class="my-4 border-0 button_add" type="submit">Add Todo</button>
     </form>
   </div>
-  <todo-items :todoList="todoList" />
+  <todo-items :todoList="todoList" @remove-todo="handleRemoveTodo" />
 </template>
 
 <script>
@@ -42,18 +42,24 @@ export default {
 
     addTodo() {
       if (this.todoName) {
-        this.todoList.push({
+        const data = {
           title: this.todoName,
           completed: false,
-        });
-        this.todoName = "";
+        };
+        axios
+          .post("http://localhost:3000/api/v1/todos", data)
+          .then((res) => {
+            console.log("res :>> ", res.data);
+            this.todoList.push(res.data);
+            this.todoName = "";
+          })
+          .catch((error) => console.log("error :>> ", error));
       }
-      this.saveTodo();
     },
 
-    saveTodo() {
-      const storageData = JSON.stringify(this.todoList);
-      localStorage.setItem("todoList", storageData);
+    handleRemoveTodo(id) {
+      // Remove todo item from todoList
+      this.todoList = this.todoList.filter((todo) => todo.id !== id);
     },
   },
 };
