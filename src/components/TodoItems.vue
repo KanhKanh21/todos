@@ -1,22 +1,22 @@
-<template lang="">
+<template>
   <div class="w-100 d-flex justify-content-center">
     <div class="w-50 todo_list">
       <div
         class="my-2 p-2 d-flex justify-content-between align-items-center todo_item"
-        v-for="item in todoListCopy"
-        :key="item.id"
+        v-for="todo in todoList"
+        :key="todo.id"
       >
-        <div :class="{ 'text-success': item.completed }">{{ item.title }}</div>
+        <div :class="{ 'text-success': todo.completed }">{{ todo.title }}</div>
 
         <div>
           <button
-            v-if="!item.completed"
-            @click="updateTodo(item)"
+            v-if="!todo.completed"
+            @click="updateTodo(todo)"
             class="border-0 text-success mx-2"
           >
             Done
           </button>
-          <button @click="removeTodo(item.id)" class="border-0 text-danger">
+          <button @click="removeTodo(todo.id)" class="border-0 text-danger">
             Remove
           </button>
         </div>
@@ -26,27 +26,25 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   props: {
     todoList: Array,
   },
-  data() {
-    return {
-      todoListCopy: this.todoList,
-    };
-  },
   methods: {
     updateTodo(todo) {
       todo.completed = true;
-      this.saveTodo();
     },
     removeTodo(id) {
-      this.todoListCopy.splice(id, 1);
-      this.saveTodo();
-    },
-    saveTodo() {
-      const storageData = JSON.stringify(this.todoList);
-      localStorage.setItem("todoList", storageData);
+      axios
+        .delete(`http://localhost:3000/api/v1/todos/${id}`)
+        .then(() => {
+          this.$emit("remove-todo", id); // Emit custom event to remove todo item
+        })
+        .catch((error) => {
+          console.log("error :>> ", error);
+        });
     },
   },
 };
