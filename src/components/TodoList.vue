@@ -34,6 +34,7 @@ export default {
         .get("http://localhost:3000/api/v1/todos")
         .then((response) => {
           this.todoList = response.data;
+          response.data.map((item) => ({ ...item, isEdit: false }));
         })
         .catch((error) => {
           console.error(error);
@@ -49,7 +50,6 @@ export default {
         axios
           .post("http://localhost:3000/api/v1/todos", data)
           .then((res) => {
-            console.log("res :>> ", res.data);
             this.todoList.push(res.data);
             this.todoName = "";
           })

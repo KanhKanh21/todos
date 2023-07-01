@@ -6,12 +6,21 @@
         v-for="todo in todoList"
         :key="todo.id"
       >
-        <div :class="{ 'text-success': todo.completed }">{{ todo.title }}</div>
-
+        <div :class="{ 'text-success': todo.completed }" v-if="!todo.isEdit">
+          {{ todo.title }}
+        </div>
+        <input type="text" v-model="todo.title" v-if="todo.isEdit" />
         <div>
           <button
             v-if="!todo.completed"
-            @click="updateTodo(todo)"
+            @click="!todo.isEdit ? editTodo(todo) : updateTitleTodo(todo)"
+            class="border-0 text-success mx-2"
+          >
+            {{ !todo.isEdit ? "Edit" : "Save" }}
+          </button>
+          <button
+            v-if="!todo.completed"
+            @click="updateDoneTodo(todo)"
             class="border-0 text-success mx-2"
           >
             Done
@@ -33,8 +42,33 @@ export default {
     todoList: Array,
   },
   methods: {
-    updateTodo(todo) {
-      todo.completed = true;
+    editTodo(todo) {
+      todo.isEdit = !todo.isEdit;
+    },
+    updateTitleTodo(todo) {
+      axios
+        .put(`http://localhost:3000/api/v1/todos/${todo.id}`, {
+          title: todo.title,
+        })
+        .then((res) => {
+          todo.title = res.data.title;
+          todo.isEdit = !todo.isEdit;
+        })
+        .catch((e) => {
+          console.log("e :>> ", e);
+        });
+    },
+    updateDoneTodo(todo) {
+      axios
+        .put(`http://localhost:3000/api/v1/todos/${todo.id}`, {
+          completed: true,
+        })
+        .then((res) => {
+          todo.completed = res.data.completed;
+        })
+        .catch((e) => {
+          console.log("e :>> ", e);
+        });
     },
     removeTodo(id) {
       axios
